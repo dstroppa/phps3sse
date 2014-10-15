@@ -34,8 +34,8 @@ node[:deploy].each do |app_name, deploy|
 
     variables(
       :host =>     (deploy[:database][:host] rescue nil),
-      :user =>     ('#{rdspwd['user']}' rescue nil),
-      :password => ('#{rdspwd['password']}' rescue nil),
+      :user =>     (rdspwd[:user] rescue nil),
+      :password => (rdspwd[:password] rescue nil),
       :db =>       (deploy[:database][:database] rescue nil),
       :table =>    (node[:phpapp][:dbtable] rescue nil)
     )
