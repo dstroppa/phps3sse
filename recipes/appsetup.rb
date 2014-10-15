@@ -25,7 +25,8 @@ node[:deploy].each do |app_name, deploy|
     end
 
     s3 = AWS::S3.new 
-    secret = s3.buckets['stroppad-chef-data-bags'].objects['encrypted_data_bag_secret'] 
+    secret_obj = s3.buckets['stroppad-chef-data-bags'].objects['encrypted_data_bag_secret'] 
+    secret = secret_obj.read
     Chef::Log.info("The secret file is '#{secret}' ")
 
     rdspwd = Chef::EncryptedDataBagItem.load("rds_secrets", "rdspwd", secret)
