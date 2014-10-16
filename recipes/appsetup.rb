@@ -1,6 +1,18 @@
 require 'rubygems' 
 require 'aws-sdk'
 
+s3 = AWS::S3.new(
+      :access_key_id => node[:s3][:access_key_id],
+      :secret_access_key => node[:s3][:secret_access_key])
+secret = s3.buckets[node[:secret][:bucket]].objects[node[:secret][:object]].read.strip
+  
+file "/tmp/encrypted_secret" do
+  content s3.buckets[node[:secret][:bucket]].objects[node[:secret][:object]].read.strip
+  owner 'root'
+  group 'root'
+  mode '0644'
+end
+
 node[:deploy].each do |app_name, deploy|
 
   script "install_composer" do
@@ -11,18 +23,6 @@ node[:deploy].each do |app_name, deploy|
     curl -sS https://getcomposer.org/installer | php
     php composer.phar install --no-dev
     EOH
-  end
-
-  s3 = AWS::S3.new(
-      :access_key_id => node[:s3][:access_key_id],
-      :secret_access_key => node[:s3][:secret_access_key])
-  secret = s3.buckets[node[:secret][:bucket]].objects[node[:secret][:object]].read.strip
-  
-  file "/tmp/encrypted_secret" do
-    content s3.buckets[node[:secret][:bucket]].objects[node[:secret][:object]].read.strip
-    owner 'root'
-    group 'root'
-    mode '0644'
   end
 
   template "#{deploy[:deploy_to]}/current/db-connect.php" do
