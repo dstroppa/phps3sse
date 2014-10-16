@@ -13,18 +13,16 @@ node[:deploy].each do |app_name, deploy|
     EOH
   end
 
-  Chef::Log.info("Accessing '#{node['secret']['bucket']}'/'#{node['secret']['object']}' with '#{node['s3']['access_key_id']}' - '#{node['s3']['secret_access_key']}' ")
   s3 = AWS::S3.new(
       :access_key_id => node[:s3][:access_key_id],
       :secret_access_key => node[:s3][:secret_access_key])
   secret = s3.buckets[node[:secret][:bucket]].objects[node[:secret][:object]].read.strip
-  Chef::Log.info("The secret is '#{secret}' ")
-
+  
   file "/etc/chef/encrypted_data_bag_secret" do
-    content secret
+    content s3.buckets[node[:secret][:bucket]].objects[node[:secret][:object]].read.strip
     owner 'root'
     group 'root'
-    mode 0400
+    mode '0400'
   end
 
   template "#{deploy[:deploy_to]}/current/db-connect.php" do
