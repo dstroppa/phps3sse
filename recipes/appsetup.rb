@@ -20,6 +20,9 @@ node[:deploy].each do |app_name, deploy|
 
   file "/etc/chef/encrypted_data_bag_secret" do
     content secret
+    owner 'root'
+    group 'root'
+    mode 0400
   end
 
   template "#{deploy[:deploy_to]}/current/db-connect.php" do
