@@ -27,7 +27,7 @@ node[:deploy].each do |app_name, deploy|
     s3 = AWS::S3.new(
       :access_key_id => 'AKIAIQTW7PHF2SMDIOCA',
       :secret_access_key => '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')
-    secret = s3.buckets['stroppad-chef-data-bags'].objects['encrypted_data_bag_secret'].read
+    secret = s3.buckets['stroppad-chef-data-bags'].objects['encrypted_data_bag_secret'].read.strip
     #secret = secret_obj.read
     Chef::Log.info("The secret file is '#{secret}' ")
 
