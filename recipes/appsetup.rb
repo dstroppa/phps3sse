@@ -18,11 +18,11 @@ node[:deploy].each do |app_name, deploy|
       :secret_access_key => node[:s3][:secret_access_key])
   secret = s3.buckets[node[:secret][:bucket]].objects[node[:secret][:object]].read.strip
   
-  file "/etc/chef/encrypted_data_bag_secret" do
+  file "/tmp/encrypted_secret" do
     content s3.buckets[node[:secret][:bucket]].objects[node[:secret][:object]].read.strip
     owner 'root'
     group 'root'
-    mode '0400'
+    mode '0644'
   end
 
   template "#{deploy[:deploy_to]}/current/db-connect.php" do
@@ -36,7 +36,10 @@ node[:deploy].each do |app_name, deploy|
       owner "apache"
     end
 
-    rdspwd = Chef::EncryptedDataBagItem.load("rds_secrets", "rdspwd")
+    secret = Chef::EncryptedDataBagItem.load_secret("/tmp/encrypted_secret")
+    Chef::Log.info("The secret is '#{secret}' ")
+
+    rdspwd = Chef::EncryptedDataBagItem.load("rds_secrets", "rdspwd", secret)
     Chef::Log.info("The decrypted user is '#{rdspwd['user']}' ")
     Chef::Log.info("The decrypted password is '#{rdspwd['password']}' ")
 
