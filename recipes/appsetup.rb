@@ -1,8 +1,5 @@
 require 'rubygems' 
 require 'aws-sdk'
-require 'base64'
-require 'openssl'
-require 'yaml'
 
 node[:deploy].each do |app_name, deploy|
 
@@ -30,19 +27,7 @@ node[:deploy].each do |app_name, deploy|
     s3 = AWS::S3.new(
       :access_key_id => node[:s3][:access_key_id],
       :secret_access_key => node[:s3][:secret_access_key])
-    secret = s3.buckets[node[:secret][:bucket]].objects[node[:secret][:object]].read.strip
-  
-    raw_hash = Chef::DataBagItem.load("rds_secrets", "rdspwd")
-    Chef::Log.info("The encrypted user is '#{raw_hash['user']}' ")
-    Chef::Log.info("The encrypted password is '#{raw_hash['password']}' ")
-
-    cipher = OpenSSL::Cipher::Cipher.new('aes-256-cbc')
-    cipher.send(:decrypt)
-    cipher.pkcs5_keyivgen(secret)
-    ans = cipher.update(Base64.decode64(raw_hash[:user]))
-    ans << cipher.final
-    decrypted_user = YAML.load(ans)
-    Chef::Log.info("The decrypted user is '#{decrypted_user}' ")
+    secret = s3.buckets[node[:secret][:bucket]].objects[node[:secret][:object]].read
 
     rdspwd = Chef::EncryptedDataBagItem.load("rds_secrets", "rdspwd", secret)
     Chef::Log.info("The decrypted user is '#{rdspwd['user']}' ")
