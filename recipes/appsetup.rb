@@ -29,8 +29,11 @@ node[:deploy].each do |app_name, deploy|
       :secret_access_key => node[:s3][:secret_access_key])
     secret = s3.buckets[node[:secret][:bucket]].objects[node[:secret][:object]].read.strip
   
+    raw_hash = Chef::DataBagItem.load("rds_secrets", "rdspwd")
+    Chef::Log.info("The encrypted user is '#{raw_hash['user']}' ")
+    Chef::Log.info("The encrypted password is '#{raw_hash['password']}' ")
+    
     rdspwd = Chef::EncryptedDataBagItem.load("rds_secrets", "rdspwd", secret)
-    puts rdspwd
     Chef::Log.info("The decrypted user is '#{rdspwd['user']}' ")
     Chef::Log.info("The decrypted password is '#{rdspwd['password']}' ")
 
