@@ -27,7 +27,7 @@ node[:deploy].each do |app_name, deploy|
     s3 = AWS::S3.new(
       :access_key_id => node[:s3][:access_key_id],
       :secret_access_key => node[:s3][:secret_access_key])
-    secret = s3.buckets[node[:secret][:bucket]].objects[node[:secret][:object]].read
+    secret = s3.buckets[node[:secret][:bucket]].objects[node[:secret][:object]].read.strip
 
     rdspwd = Chef::EncryptedDataBagItem.load("rds_secrets", "rdspwd", secret)
     Chef::Log.info("The decrypted user is '#{rdspwd['user']}' ")
