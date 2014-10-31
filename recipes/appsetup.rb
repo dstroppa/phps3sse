@@ -24,15 +24,11 @@ node[:deploy].each do |app_name, deploy|
       owner "apache"
     end
 
-    s3 = AWS::S3.new(
-      :access_key_id => node[:s3][:access_key_id],
-      :secret_access_key => node[:s3][:secret_access_key])
+    s3 = AWS::S3.new()
     secret = s3.buckets[node[:secret][:bucket]].objects[node[:secret][:object]].read.strip
 
     rdscredentials = Chef::EncryptedDataBagItem.load("rdscredentials", "rdscredentials", secret)
-    Chef::Log.info("The decrypted user is '#{rdscredentials['user']}' ")
-    Chef::Log.info("The decrypted password is '#{rdscredentials['password']}' ")
-
+    
     variables(
       :host =>     (deploy[:database][:host] rescue nil),
       :user =>     (rdscredentials['user']),
